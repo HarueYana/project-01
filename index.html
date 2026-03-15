@@ -1,65 +1,111 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="utf-8" />
-        <!--ページタイトル-->
-        <title>my sketch</title>
-        <style>
-            body {
-                padding: 0;
-                margin: 0;
-            }
-        </style>
-        <!--スタイルシートファイルへのリンク-->
-        <link rel="stylesheet" type="text/css" href="./style.css" />
-        <script src="./p5.min.js"></script>
-        <!--サウンドライブラリを使うにはサーバ上で動かすことが必要-->
-        <!--    <script src="./p5.sound.min.js"></script> -->
-        <!--スケッチファイルへのリンク-->
-        <script src="sketch.js"></script>
-        <!--以下、iOSの対応-->
-        <meta
-            name="viewport"
-            content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1"
-        />
-        <meta name="apple-mobile-web-app-title" content="p5.js example" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
-        />
-        <preference name="DisallowOverscroll" value="true" />
-    </head>
-    <body>
-        <div
-            id="modal-bg"
-            style="
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-                justify-content: center;
-                align-items: center;
-            "
-        >
-            <div
-                id="modal-content"
-                style="
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    text-align: center;
-                    min-width: 250px;
-                "
-            >
-                <p id="modal-message">文字を入力してください</p>
-                <input id="modal-input" type="text" />
-                <button id="modal-ok">OK</button>
-            </div>
+<head>
+  <meta charset="UTF-8">
+  <title>Circle Text Hybrid</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="ui-layer">
+
+    <div id="title-screen">
+      <h1>作品のタイトル</h1>
+      <p>言葉を紡ぎ、風景を描く</p>
+      
+      <div class="title-buttons">
+        <button id="start-btn" class="title-btn">すぐにはじめる</button>
+        <button id="tutorial-btn" class="title-btn outline">操作説明を見る</button>
+      </div>
+    </div> <button id="help-btn" class="help-btn hidden">？</button>
+
+
+    <div id="tutorial-screen" class="hidden">
+      
+      <button id="tut-close-btn" class="tut-close-btn hidden">×</button>
+
+      <div class="tutorial-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div id="tutorial-slider">
+        <div class="tutorial-page">
+          <div class="dummy-img">画像1が入ります（比率16:9）</div>
+          <h2>言葉を配置する</h2>
+          <p>画面上の円をドラッグして、好きな場所へ移動させることができます。</p>
         </div>
-    </body>
+        <div class="tutorial-page">
+          <div class="dummy-img">画像2が入ります</div>
+          <h2>詳細を展開する</h2>
+          <p>円をダブルクリックすると、連なる言葉の断片が直線状に展開されます。</p>
+        </div>
+        <div class="tutorial-page">
+          <div class="dummy-img">画像3が入ります</div>
+          <h2>言葉を編む</h2>
+          <p>展開された小さな円にカーソルを乗せると、言葉の追加や編集ができます。</p>
+        </div>
+        <div class="tutorial-page">
+          <div class="dummy-img">画像4が入ります</div>
+          <h2>全体を眺める</h2>
+          <p>Wキーを押すと、あなたが紡いだ言葉の全体像をテキストとして確認できます。</p>
+        </div>
+      </div>
+
+      <div class="tutorial-nav">
+        <button id="tut-back-btn" class="nav-btn hidden">戻る</button>
+        <div class="spacer"></div> 
+        <button id="tut-next-btn" class="nav-btn">次へ</button>
+        <button id="tut-start-btn" class="nav-btn hidden">はじめる</button>
+      </div>
+    </div>
+    
+    <div id="instructions"></div>
+
+    <div id="reset-hint">Rキーですべてリセット</div>
+
+    <div id="circle-menu" class="hidden">
+      <button id="btn-delete" class="menu-btn red">×</button>
+      <button id="btn-add" class="menu-btn green">＋</button>
+      <button id="btn-edit" class="menu-btn blue">✎</button>
+    </div>
+
+    <div id="text-window" class="hidden">
+      
+      <div id="text-window-inner">
+        <div id="text-content-left" class="text-panel">
+          <div id="text-content"></div>
+        </div>
+        <div id="text-content-right" class="text-panel">
+          <div id="text-content-original"></div>
+        </div>
+      </div>
+      
+      <div class="window-ui">
+        <p class="hint">escキーで戻る</p>
+        
+        <div id="split-btn-container">
+          <span class="split-btn-text">元の言葉を辿る</span>
+          <button id="split-btn" class="icon-btn">▶</button>
+        </div>
+      </div>
+
+    </div>
+    
+    <div id="modal-bg" class="hidden">
+      <div id="modal-content">
+        <p id="modal-message">テキストを入力してください</p>
+        <input type="text" id="modal-input" autocomplete="off">
+        <button id="modal-ok">OK</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="sketch.js"></script>
+</body>
 </html>
