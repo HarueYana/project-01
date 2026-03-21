@@ -1,14 +1,14 @@
 body {
   margin: 0;
-  overflow: hidden; /* スクロールバーを隠す */
+  overflow: hidden;
   background-color: #f0f0f0;
-  /* お好みのフォントに調整してください */
   font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 }
 
-#title-screen{
+#title-screen {
   position: absolute;
   display: flex;
+  text-align: center;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -17,15 +17,21 @@ body {
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-color: #000;
+
+  /* 半透明すりガラス：キャンバスのアニメーションが透けて見える */
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
   color: #fff;
   font-size: 24px;
   line-height: 2;
   opacity: 1;
-  transition: opacity 0.1s ease;
+  transition: opacity 1s ease;
   pointer-events: auto;
 }
-.fade-out{
+
+.fade-out {
   opacity: 0 !important;
   pointer-events: none;
 }
@@ -63,28 +69,31 @@ body {
 #tutorial-screen {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background-color: #000;
-  color: #fff;
-  z-index: 15; /* タイトル画面より上に配置 */
+  z-index: 15;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* 画面外にはみ出したスライドを隠す */
+  overflow: hidden;
   opacity: 1;
   transition: opacity 1s ease;
   pointer-events: auto;
+
+  /* タイトル画面と同じすりガラス：裏のキャンバスが透ける */
+  background: rgba(0, 0, 0, 0.50);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
 }
 
 #tutorial-slider {
   display: flex;
   width: 100%;
-  /* ここでスライドの滑らかさを設定します */
   transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .tutorial-page {
-  min-width: 100%; /* 各ページを画面幅100%にする */
+  min-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,18 +101,17 @@ body {
   box-sizing: border-box;
 }
 
-/* ダミー画像のスタイル */
-.dummy-img {
+/* チュートリアル動画 */
+.tutorial-video {
   width: 60%;
   max-width: 600px;
-  aspect-ratio: 16 / 9; /* 画像の縦横比 */
-  background-color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #888;
+  aspect-ratio: 16 / 9;
   border-radius: 12px;
   margin-bottom: 40px;
+  object-fit: cover;
+  background-color: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: block;
 }
 
 .tutorial-nav {
@@ -115,16 +123,22 @@ body {
 }
 
 .nav-btn {
-  padding: 12px 24px;
-  font-size: 16px;
-  background: #fff;
-  color: #000;
-  border: none;
-  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 40px;
   cursor: pointer;
-  transition: background 0.2s;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
-.nav-btn:hover { background: #ccc; }
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+}
 .spacer { flex-grow: 1; }
 
 #canvas-container {
@@ -141,72 +155,315 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: 2;
-  pointer-events: none; /* UIの隙間から下のキャンバスを触れるようにする魔法 */
+  pointer-events: none;
 }
 
-/* インタラクティブな要素だけクリックを許可 */
 #circle-menu, #text-window, #modal-bg {
   pointer-events: auto;
 }
 
-/* --- 操作説明 --- */
-#instructions {
+/* --- 操作説明・リセットヒント（削除済み・ボタンに移行） --- */
+
+/* =========================================
+   メインコントロール（3箇所に分散配置）
+   ========================================= */
+
+.main-ctrl-group {
   position: absolute;
-  bottom: 40px;
-  left: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.main-ctrl-group:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 右下：言葉を眺める ＋ リセット */
+#ctrl-bottom-right {
+  bottom: 36px;
+  right: 36px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  transform: translateY(8px);
+}
+#ctrl-bottom-right:not(.hidden) {
+  transform: translateY(0);
+}
+
+/* 左端：前の言葉へ（大きな三角） */
+#ctrl-arrow-left {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+#ctrl-arrow-left:not(.hidden) {
+  transform: translateY(-50%);
+}
+
+/* 右端：次の言葉へ（大きな三角） */
+#ctrl-arrow-right {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+#ctrl-arrow-right:not(.hidden) {
+  transform: translateY(-50%);
+}
+
+/* --- ボタン共通 --- */
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  cursor: pointer;
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  transition: background 0.22s ease, color 0.2s ease,
+              box-shadow 0.22s ease, transform 0.18s ease,
+              opacity 0.2s ease;
+}
+
+.ctrl-btn:active {
+  transform: scale(0.96) !important;
+}
+
+/* --- 言葉を眺める：塗りつぶし・目立つ --- */
+.ctrl-btn--primary {
+  padding: 13px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 12px;
+  background: rgba(20, 20, 20, 0.85);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 3px 16px rgba(0,0,0,0.22),
+    0 1px 3px rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ctrl-btn--primary:hover {
+  background: rgba(0, 0, 0, 0.95);
+  box-shadow:
+    0 5px 22px rgba(0,0,0,0.30),
+    0 2px 5px rgba(0,0,0,0.18);
+  transform: translateY(-2px);
+}
+
+/* --- リセット：テキストのみ・控えめ --- */
+.ctrl-btn--ghost {
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.ctrl-btn--ghost:hover {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-  line-height: 2;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
 }
 
-#reset-hint {
-  position: absolute;
-  bottom: 40px;
-  right: 40px;
-  color: #000;
-  font-size: 16px;
+/* ホバー時に赤みを帯びる */
+#ctrl-reset-btn:hover {
+  color: rgba(255, 160, 140, 0.9);
+  background: rgba(200, 60, 40, 0.12);
 }
 
-/* --- 子円メニュー --- */
+/* --- 次/前の言葉へ：左右端の大きな三角矢印 --- */
+.ctrl-btn--triangle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 220px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  /* 普段はごく薄く存在 */
+  color: rgba(255, 255, 255, 0.07);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.ctrl-btn--triangle svg {
+  width: 44px;
+  height: 180px;
+  filter: drop-shadow(0 0 0px transparent);
+  transition: filter 0.3s ease;
+}
+
+/* ホバーで存在を明らかに */
+.ctrl-btn--triangle:hover {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ctrl-btn--triangle:hover svg {
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.28));
+}
+
+/* 左矢印：ホバーで左にわずかにスライド */
+#ctrl-prev-btn:hover {
+  transform: translateX(-4px);
+}
+
+/* 右矢印：ホバーで右にわずかにスライド */
+#ctrl-sample-btn.ctrl-btn--triangle:hover {
+  transform: translateX(4px);
+}
+
+.ctrl-btn--triangle:active {
+  color: rgba(255, 255, 255, 0.95) !important;
+  transform: scale(0.95) !important;
+}
+
+
+/* --- テキストウィンドウの閉じるボタン --- */
+.text-close-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 40px;
+  color: rgba(0, 0, 0, 0.5);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.text-close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* --- 子円メニュー（縦並びフローティングパネル） --- */
 #circle-menu {
   position: absolute;
   display: flex;
   flex-direction: column;
-  color: white;
-  gap: 15px;
+  align-items: stretch;
   transform: translateY(-50%);
-  transition: top 0.1s, left 0.1s; /* 追従を少し滑らかに */
+
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 6px;
+  gap: 0;
+
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+
+  /* スライドイン */
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 0.12s ease,
+    left 0.12s ease;
+  transform: translateY(-50%) translateX(-6px);
+}
+
+#circle-menu:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
 }
 
 .menu-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  height: 38px;
+  padding: 0 10px;
   border: none;
-  color: black;
-  font-size: 20px;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
-.menu-btn:hover { transform: scale(1.15); }
-.red { background-color: rgb(255, 100, 100); }
-.green { background-color: rgb(100, 255, 100); }
-.blue { background-color: rgb(100, 100, 255); }
 
-/* 左右のテキストの見た目を、完全に同じ「美しい明朝体・広い行間」に統一する */
+.menu-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.85);
+}
+
+#btn-delete:hover {
+  background: rgba(220, 60, 60, 0.08);
+  color: rgb(200, 50, 50);
+}
+
+/* アイコン部分：常に表示 */
+.menu-icon {
+  flex-shrink: 0;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ラベル部分：普段は幅0で非表示、ホバーで展開 */
+.menu-label {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transition:
+    max-width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.25s ease,
+    margin 0.3s ease;
+}
+
+.menu-btn:hover .menu-label {
+  max-width: 120px;
+  opacity: 1;
+  margin-left: 8px;
+}
+
+.menu-divider {
+  height: 1px;
+  width: calc(100% - 8px);
+  margin: 2px 4px;
+  background: rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
 #text-content,
 #text-content-original {
   font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", serif;
-  font-size: 18px;
-  line-height: 2.8; /* ★ここが行間の広さです（2.8文字分の高さ） */
-  letter-spacing: 0.15em; /* 文字と文字の隙間（字送り） */
+  /* 最小14px・最大28px、画面幅1400pxで24px相当 */
+  font-size: clamp(14px, 1.7vw, 28px);
+  line-height: 2.8;
+  letter-spacing: 0.15em;
   color: #222;
-  text-align: left; /* 左揃えに統一 */
+  text-align: left;
 }
 
-/* 過去の言葉（右側）だけは、少し記憶のように薄くする */
 #text-content-original {
   color: rgba(34, 34, 34, 0.4);
 }
@@ -218,52 +475,16 @@ body {
   font-size: 14px;
 }
 
-/* --- モーダルウィンドウ --- */
-#modal-bg {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-}
-
-#modal-input {
-  width: 80%;
-  padding: 10px;
-  font-size: 16px;
-  margin: 15px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-#modal-ok {
-  padding: 10px 30px;
-  font-size: 16px;
-  background: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#modal-ok:hover { background: #555; }
-
-/* 共通の非表示クラス */
+/* --- 共通の非表示クラス --- */
+/* [修正5] .hidden は display:none のみ。
+   #text-window.hidden は opacity/visibility で上書きするので競合しない */
 .hidden { display: none !important; }
 
-/* --- 操作画面右上の「？」ボタン --- */
+/* --- 操作画面左上の「？」ボタン --- */
 .help-btn {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 20px;
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -275,7 +496,7 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.2s, background 0.2s;
-  pointer-events: auto; /* クリックできるようにする */
+  pointer-events: auto;
   z-index: 5;
 }
 
@@ -294,7 +515,7 @@ body {
   color: #fff;
   font-size: 40px;
   cursor: pointer;
-  z-index: 20; /* スライダーより上に配置 */
+  z-index: 20;
   transition: transform 0.2s;
 }
 
@@ -303,35 +524,33 @@ body {
 }
 
 /* =========================================
-   Wキー：空間に浮かぶテキスト（アイデア1）
+   テキストウィンドウ（Wキー）
    ========================================= */
 #text-window {
-  position: fixed; /* 画面全体を覆う */
+  position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: 100;
-  
-  /* 背景をうっすらと白く濁らせて、すりガラス風にする */
   background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px); 
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  
   opacity: 1;
   visibility: visible;
   transition: opacity 0.6s ease, visibility 0.6s;
 }
 
+/* [修正5] #text-window.hidden は display:none ではなく
+   opacity/visibility で制御してアニメーションを活かす */
 #text-window.hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  display: flex !important; /* .hidden の display:none を上書き */
 }
 
-/* テキストを配置する見えない基準枠 */
 #text-window-inner {
   position: relative;
   width: 80%;
@@ -343,47 +562,64 @@ body {
   transform: translateX(8%);
 }
 
-/* 左右のテキスト共通の、詩的なタイポグラフィ設定 */
 .text-panel {
   position: absolute;
-  font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", serif; /* 美しい明朝体 */
-  font-size: 18px;
-  line-height: 2.8; /* 行間をたっぷりとる */
-  letter-spacing: 0.15em; /* 字送りも広めに */
-  color: #222; /* 真っ黒ではなく、少し柔らかい墨色 */
-  width: 400px; 
+  font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", serif;
+  /* 最小11px・最大22px、画面幅1400pxで18px相当 */
+  font-size: clamp(11px, 1.28vw, 22px);
+  line-height: 2.8;
+  letter-spacing: 0.15em;
+  color: #222;
+  width: 500px;
   transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1s ease;
 }
 
-/* 左側（現在の言葉）の初期配置：中央 */
 #text-content-left {
   transform: translateX(0);
 }
 
-/* 右側（元の言葉）の初期配置：少し右に隠しておく */
 #text-content-right {
   transform: translateX(30px);
   opacity: 0;
   pointer-events: none;
-  color: rgba(34, 34, 34, 0.4); /* 過去の記憶のように、少し薄くする */
+  color: rgba(34, 34, 34, 0.4);
 }
 
-/* --- 分割（比較）モードのときのアニメーション --- */
+/* --- 分割（比較）モード ---
+   左=原文（#text-content-left）が左に退避
+   右=現在（#text-content-right）が右に展開 */
 #text-window.is-split #text-content-left {
-  transform: translateX(-55%); /* 左へスッと退避 */
+  transform: translateX(-55%);
 }
 
 #text-window.is-split #text-content-right {
-  transform: translateX(55%); /* 右へスッと現れる */
+  transform: translateX(55%);
   opacity: 1;
 }
 
-/* 野暮ったいスクロールバーを完全に隠す */
 .text-panel::-webkit-scrollbar {
   display: none;
 }
 
-/* --- 下部UIとホバーボタン --- */
+/* --- テキスト行ハイライト --- */
+.text-line {
+  display: inline;
+  color: inherit;
+  transition: color 0.25s ease;
+  cursor: default;
+}
+
+/* JS で付与される .hovered クラスで左右同時にハイライト */
+.text-line.hovered {
+  color: #b05a00;
+}
+
+/* タイピング中の現在行は少し薄く表示 */
+.typing-current {
+  opacity: 0.6;
+}
+
+/* --- 下部UI --- */
 .window-ui {
   position: absolute;
   bottom: 50px;
@@ -448,20 +684,186 @@ body {
 .tutorial-dots {
   display: flex;
   justify-content: center;
-  gap: 12px; /* ドット同士の隙間 */
-  margin-bottom: 20px; /* 下の画像（スライダー）との余白 */
+  gap: 12px;
+  margin-bottom: 20px;
   z-index: 10;
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3); /* 消灯状態（半透明の白） */
+  background: rgba(255, 255, 255, 0.25);
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .dot.active {
-  background: rgba(255, 255, 255, 1); /* 点灯状態（真っ白） */
-  transform: scale(1.3); /* 点灯している時だけ少し大きくする演出 */
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.35);
+}
+
+/* チュートリアルページのテキスト */
+.tutorial-page h2 {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+.tutorial-page p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin: 0;
+}
+
+/* --- モーダルウィンドウ --- */
+#modal-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-content {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 40px 44px 36px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  min-width: 320px;
+}
+
+#modal-message {
+  font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", serif;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.1em;
+  margin: 0 0 20px;
+}
+
+#modal-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", serif;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: #222;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  outline: none;
+  transition: border-color 0.2s ease;
+  margin: 0 0 28px;
+}
+
+#modal-input:focus {
+  border-bottom-color: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+#modal-ok {
+  padding: 10px 36px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+#modal-ok:hover {
+  background: rgba(0, 0, 0, 0.95);
+  transform: scale(1.03);
+}
+
+/* =========================================
+   削除取り消しトースト
+   ========================================= */
+.delete-toast {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 18px;
+  min-width: 260px;
+
+  background: rgba(30, 30, 30, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+
+.delete-toast:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.delete-toast-msg {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.8);
+  flex: 1;
+}
+
+.delete-undo-btn {
+  padding: 5px 14px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s ease;
+  flex-shrink: 0;
+}
+
+.delete-undo-btn:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+/* 残り時間を示すプログレスバー */
+.delete-toast-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: rgba(255,255,255,0.3);
+  transform-origin: left;
+  transform: scaleX(1);
 }

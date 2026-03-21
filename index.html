@@ -11,18 +11,52 @@
   <div id="ui-layer">
 
     <div id="title-screen">
-      <h1>作品のタイトル</h1>
-      <p>言葉を紡ぎ、風景を描く</p>
-      
+      <h1>詩的な文をみつけよう！</h1>
+      <p>この作品は、詩的な表現は文脈や意味の「飛躍」から生まれるという仮定をもとにつくられました。<br>
+      文をどんどん変えて、「飛躍」を味わいましょう。</p>
+
       <div class="title-buttons">
         <button id="start-btn" class="title-btn">すぐにはじめる</button>
         <button id="tutorial-btn" class="title-btn outline">操作説明を見る</button>
       </div>
-    </div> <button id="help-btn" class="help-btn hidden">？</button>
+    </div>
 
+    <button id="help-btn" class="help-btn hidden">？</button>
+
+    <!-- 右下：リセット ＋ 言葉を眺める（左からこの順） -->
+    <div id="ctrl-bottom-right" class="main-ctrl-group hidden">
+      <button id="ctrl-reset-btn" class="ctrl-btn ctrl-btn--ghost">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8a5 5 0 1 1 1.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <polyline points="1,10 3,8 5,10" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        リセット
+      </button>
+      <button id="ctrl-text-btn" class="ctrl-btn ctrl-btn--primary">
+        言葉を眺める
+      </button>
+    </div>
+
+    <!-- 左端：前の言葉へ（大きな三角） -->
+    <div id="ctrl-arrow-left" class="main-ctrl-group hidden">
+      <button id="ctrl-prev-btn" class="ctrl-btn ctrl-btn--triangle" aria-label="前の言葉へ">
+        <svg viewBox="0 0 40 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,4 4,60 36,116" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 右端：次の言葉へ（大きな三角） -->
+    <div id="ctrl-arrow-right" class="main-ctrl-group hidden">
+      <button id="ctrl-sample-btn" class="ctrl-btn ctrl-btn--triangle" aria-label="次の言葉へ">
+        <svg viewBox="0 0 40 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="4,4 36,60 4,116" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
 
     <div id="tutorial-screen" class="hidden">
-      
+
       <button id="tut-close-btn" class="tut-close-btn hidden">×</button>
 
       <div class="tutorial-dots">
@@ -34,47 +68,78 @@
 
       <div id="tutorial-slider">
         <div class="tutorial-page">
-          <div class="dummy-img">画像1が入ります（比率16:9）</div>
-          <h2>言葉を配置する</h2>
-          <p>画面上の円をドラッグして、好きな場所へ移動させることができます。</p>
+          <!-- ファイルパス：videos/tutorial-1.mp4 を差し替えてください -->
+          <video class="tutorial-video" src="./expl_mov/expl_01.mov"
+            muted loop playsinline preload="auto"></video>
+          <h2>文章を入れ替える</h2>
+          <p>画面上の円をドラッグして、好きな場所へ入れ替えることができます。</p>
         </div>
         <div class="tutorial-page">
-          <div class="dummy-img">画像2が入ります</div>
-          <h2>詳細を展開する</h2>
-          <p>円をダブルクリックすると、連なる言葉の断片が直線状に展開されます。</p>
+          <!-- ファイルパス：videos/tutorial-2.mp4 を差し替えてください -->
+          <video class="tutorial-video" src="./expl_mov/expl_02.mov"
+            muted loop playsinline preload="auto"></video>
+          <h2>詳細に入れ替える</h2>
+          <p>円をダブルクリックすると、文章中のことばを入れ替えることができます。。</p>
         </div>
         <div class="tutorial-page">
-          <div class="dummy-img">画像3が入ります</div>
+          <!-- ファイルパス：videos/tutorial-3.mp4 を差し替えてください -->
+          <video class="tutorial-video" src="./expl_mov/expl_03.mov"
+            muted loop playsinline preload="auto"></video>
           <h2>言葉を編む</h2>
-          <p>展開された小さな円にカーソルを乗せると、言葉の追加や編集ができます。</p>
+          <p>さらにダブルクリックすると、ことばの追加や編集ができます。</p>
         </div>
         <div class="tutorial-page">
-          <div class="dummy-img">画像4が入ります</div>
+          <!-- ファイルパス：videos/tutorial-4.mp4 を差し替えてください -->
+          <video class="tutorial-video" src="./expl_mov/expl_04.mov"
+            muted loop playsinline preload="auto"></video>
           <h2>全体を眺める</h2>
-          <p>Wキーを押すと、あなたが紡いだ言葉の全体像をテキストとして確認できます。</p>
+          <p>「言葉を眺める」ボタンを押すと、あなたが紡いだ言葉の全体像をテキストとして確認できます。<br>
+          どんな文になったか、もとの文とも比べてみましょう。</p>
         </div>
       </div>
 
       <div class="tutorial-nav">
         <button id="tut-back-btn" class="nav-btn hidden">戻る</button>
-        <div class="spacer"></div> 
+        <div class="spacer"></div>
         <button id="tut-next-btn" class="nav-btn">次へ</button>
         <button id="tut-start-btn" class="nav-btn hidden">はじめる</button>
       </div>
     </div>
-    
-    <div id="instructions"></div>
-
-    <div id="reset-hint">Rキーですべてリセット</div>
 
     <div id="circle-menu" class="hidden">
-      <button id="btn-delete" class="menu-btn red">×</button>
-      <button id="btn-add" class="menu-btn green">＋</button>
-      <button id="btn-edit" class="menu-btn blue">✎</button>
+      <button id="btn-delete" class="menu-btn">
+        <span class="menu-icon">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="14" y1="2" x2="2" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="menu-label">削除する</span>
+      </button>
+      <div class="menu-divider"></div>
+      <button id="btn-add" class="menu-btn">
+        <span class="menu-icon">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="menu-label">言葉を追加</span>
+      </button>
+      <div class="menu-divider"></div>
+      <button id="btn-edit" class="menu-btn">
+        <span class="menu-icon">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 12.5L4.5 10L11 3.5C11.8 2.7 13 2.7 13.8 3.5C14.6 4.3 14.6 5.5 13.8 6.3L7.3 12.8L4.8 13.3L2 12.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <line x1="10" y1="4.5" x2="12.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="menu-label">言葉を編集</span>
+      </button>
     </div>
 
     <div id="text-window" class="hidden">
-      
+
       <div id="text-window-inner">
         <div id="text-content-left" class="text-panel">
           <div id="text-content"></div>
@@ -83,10 +148,16 @@
           <div id="text-content-original"></div>
         </div>
       </div>
-      
+
       <div class="window-ui">
-        <p class="hint">escキーで戻る</p>
-        
+        <button id="text-close-btn" class="text-close-btn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="14" y1="2" x2="2" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>閉じる</span>
+        </button>
+
         <div id="split-btn-container">
           <span class="split-btn-text">元の言葉を辿る</span>
           <button id="split-btn" class="icon-btn">▶</button>
@@ -94,13 +165,20 @@
       </div>
 
     </div>
-    
+
     <div id="modal-bg" class="hidden">
       <div id="modal-content">
         <p id="modal-message">テキストを入力してください</p>
         <input type="text" id="modal-input" autocomplete="off">
         <button id="modal-ok">OK</button>
       </div>
+    </div>
+
+    <!-- 削除取り消しトースト -->
+    <div id="delete-toast" class="delete-toast hidden">
+      <span class="delete-toast-msg">削除しました</span>
+      <button id="delete-undo-btn" class="delete-undo-btn">元に戻す</button>
+      <div id="delete-toast-bar" class="delete-toast-bar"></div>
     </div>
 
   </div>
